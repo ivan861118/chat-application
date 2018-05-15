@@ -1,15 +1,28 @@
-<!doctype html>
+  <!doctype html>
 <html>
   <head>
     <title>Socket.IO chat</title>
-    <link rel="stylesheet" href="/assets/style.css" type="text/css">
+    <!-- <link rel="stylesheet" href="style.css" type="text/css"> -->
+
+    <meta charset="UTF-8">
+    <title>Bootstrap引入</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->  
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous"> 
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->  
+    <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>  
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->  
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+   
+
     
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script>
       var socket = io();
 </script>
+
   </head>
   <body>
     <!-- <ul id="messages"></ul>
@@ -19,42 +32,127 @@
 
     <div id="msg"></div> -->
 
-    <div id="container">
-      <div id='user-list'>聯絡人列表</div>
-      <div id="status-box">Server: <span id="status">-</span> / <span id="online">0</span> online.</div>
-      <div>目前對話者</div>
-      <div id="content">
-          <div class="msg">
-              <span class="name">{Duye}</span>
-              Hello!
-          </div>
-          <div class="msg">
-              <span class="name">{Alice}</span>
-              Hi!
-          </div>
-      </div>
+    <div  class="container row">
+        <div class="container col-4 border border-primary">
+                <div id="status-box"> Server: 
+                        <span id="status">-</span> /  <span id="online">0</span> online.
+                </div>
+                <hr>
+                <div class="container">
+                        <ul class="list-group ">
+                            <div class="text-center font-weight-bold">聯絡人列表</div>
+                            <li class="list-group-item list-group-item-action active">user1</li>
+                            <li class="list-group-item list-group-item-action">user1</li>
+                            <li class="list-group-item list-group-item-action">user1</li>
+
+                            
+                        </li>
+
+                </div>           
+
+        </div>
+
+        <div class="container col-8 border border-primary ">
+
+                <div class="text-center font-weight-bold">
+                    目前對話者:
+                </div>
+                <hr>
+
+                <div  class="content container">
+                    <ul id='chat-window'>
+                        <li class='' >msg1</li>
+                        <li class=''>msg2</li>
+                        
+                    </ul>
+
+                </div>
+                <hr>
+                <div id="send-box" class="container ">
+                        <form id="send-form" class='form-group'>
+                            <input type="text" name="name" id="name" placeholder="暱稱">
+                            <input type="text" name="msg" id="msg" placeholder="說點什麼？">
+                            <input type="submit" value="送出" class='btn btn-outline-primary btn-sm'>
+                        </form>
+                </div>
+
+            </div>
+            
+
+
       
-      <div id="send-box">
-          <form id="send-form">
-              <input type="text" name="name" id="name" placeholder="暱稱">
-              <input type="text" name="msg" id="msg" placeholder="說點什麼？">
-              <input type="submit" value="送出">
-          </form>
-      </div>
-  </div>
 
+  </div> 
+  <script>//Function Declaration
+    ///cookies for log in
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
 
-<script>
-   
-    $("form").submit(function(){    
-      socket.emit('chat message', $('#msg').val());
-      $('#msg').val('');
-    
-      return false;
-    });
-
-   
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
   </script>
+
+  <script>
+
+
+        var name=getCookie('name');
+        if(name){
+            $('#name').val(name);
+        }
+        
+   
+        $("form").submit(function(){
+            var formData={
+                name:$('#name').val(),
+                msg: $('#msg').val()
+            };
+                
+          socket.emit('send',formData);
+          setCookie("name", $('#name').val());
+
+          $('#msg').val('');
+
+          return false;
+        });
+
+        
+
+        //線上人數
+        socket.on("online", function (amount) {
+              $('#online').text(amount);
+          });
+
+        socket.on('send',function(formData){
+            $('#chat-window').append(
+                "<li >"+formData.name+':'+formData.msg+"</li>");
+
+        });
+
+    
+       
+</script>
+    
+
+
+
+
 
   <!-- <script>
       document.addEventListener("DOMContentLoaded", () => {
@@ -106,7 +204,7 @@
 
 
 
-
+  <script  src='../index.js'></script>
   </body>
   
 </html>
