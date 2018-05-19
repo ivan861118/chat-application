@@ -1,0 +1,47 @@
+<!doctype html>
+<html> 
+    <head>
+        <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>  
+        <title>Login:</title>
+    </head>
+
+    <body>
+        <h1>Login</h1>
+        <form action='/login' method='post'> 
+            Name : 
+
+            <select id='name'>
+                    　<option value="user1">user1</option>
+                    　<option value="user2">user2</option>
+                    　<option value="user3">user3</option>
+                    　<option value="user4">user4</option>
+                    　<option value="user5">user5</option>
+             </select>
+             <input type="submit">
+        </form>
+    
+    
+
+
+    <script>
+       $("form").submit(function(req,res){
+
+
+           console.log('login');
+           window.location.href='/login';
+        setCookie("name", $('#name').val()); 
+
+          return false;
+        });
+         
+    
+
+    function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+    </script>
+    </body>
+</html>

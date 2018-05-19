@@ -1,7 +1,7 @@
   <!doctype html>
 <html>
   <head>
-    <title>Socket.IO chat</title>
+    <title>User Name:</title>
     <!-- <link rel="stylesheet" href="style.css" type="text/css"> -->
 
     <meta charset="UTF-8">
@@ -19,6 +19,7 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script  src='./function.js'></script>
   <script>
       var socket = io();
 </script>
@@ -31,19 +32,26 @@
     </form>
 
     <div id="msg"></div> -->
-
-    <div  class="container row">
-        <div class="container col-4 border border-primary">
+<style>
+html, body
+        {
+            height: 100%;
+        }
+</style>
+    <div  class="container-fluid h-100 row">
+        <div class="container-fluid col-4 border border-primary">
                 <div id="status-box"> Server: 
                         <span id="status">-</span> /  <span id="online">0</span> online.
                 </div>
                 <hr>
                 <div class="container">
-                        <ul class="list-group ">
-                            <div class="text-center font-weight-bold">聯絡人列表</div>
-                            <li class="list-group-item list-group-item-action active">user1</li>
-                            <li class="list-group-item list-group-item-action">user1</li>
-                            <li class="list-group-item list-group-item-action">user1</li>
+                        <div class="text-center font-weight-bold">聯絡人列表</div>
+                        <ul id='user-list' class="list-group ">
+                            <li class="user list-group-item list-group-item-action active">user1</li>
+                            <li class="user list-group-item list-group-item-action">user2</li>
+                            <li class="user list-group-item list-group-item-action">user3</li>
+                            <li class="user list-group-item list-group-item-action">user4</li>
+                            <li class="user list-group-item list-group-item-action">user5</li>
 
                             
                         </li>
@@ -52,25 +60,26 @@
 
         </div>
 
-        <div class="container col-8 border border-primary ">
+        <div class="container-fluid col-8 border border-primary mr-0">
 
-                <div class="text-center font-weight-bold">
+                <div id='current-chat' class="text-center font-weight-bold">
                     目前對話者:
                 </div>
                 <hr>
 
-                <div  class="content container">
+                <div  style='height:350px' class="content container">
+                    
                     <ul id='chat-window'>
-                        <li class='' >msg1</li>
-                        <li class=''>msg2</li>
+                        
+                        
                         
                     </ul>
 
                 </div>
                 <hr>
-                <div id="send-box" class="container ">
-                        <form id="send-form" class='form-group'>
-                            <input type="text" name="name" id="name" placeholder="暱稱">
+                <div id="send-box" class="wrap container ">
+                        <form id="send-form" class='mb-0 form-group'>
+                            <input type="text" name="name" id="name" disabled >
                             <input type="text" name="msg" id="msg" placeholder="說點什麼？">
                             <input type="submit" value="送出" class='btn btn-outline-primary btn-sm'>
                         </form>
@@ -82,68 +91,63 @@
 
       
 
-  </div> 
-  <script>//Function Declaration
-    ///cookies for log in
-function setCookie(cname, cvalue, exdays) {
-    var d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-    var expires = "expires="+ d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-}
-
-function getCookie(cname) {
-    var name = cname + "=";
-    var decodedCookie = decodeURIComponent(document.cookie);
-    var ca = decodedCookie.split(';');
-    for(var i = 0; i <ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return "";
-}
-  </script>
+  </div>
 
   <script>
+        
+        var user_list=document.getElementsByClassName('user');
+        
+        //active class + handle conversation shown on window
+        for(let i=0;i<user_list.length;i++){
+            user_list[i].addEventListener('click',function(){
+                const target_name=$(this).text();
+                $('#user-list li').removeClass('active');    
+                $(this).addClass("active");
+                // socket.emit('switch_chat',target_name);
+                $('#current-chat').text("目前對話者:"+target_name);
+                
+            
+            });
 
+            
+        }
 
         var name=getCookie('name');
         if(name){
             $('#name').val(name);
-        }
-        
+        } 
    
         $("form").submit(function(){
             var formData={
                 name:$('#name').val(),
                 msg: $('#msg').val()
             };
-                
+            
           socket.emit('send',formData);
           setCookie("name", $('#name').val());
-
           $('#msg').val('');
 
           return false;
         });
-
-        
+       
 
         //線上人數
         socket.on("online", function (amount) {
               $('#online').text(amount);
           });
-
+        //send message
         socket.on('send',function(formData){
             $('#chat-window').append(
-                "<li >"+formData.name+':'+formData.msg+"</li>");
+                $('<div>').append(
+                $('<li>',{class:'list-group-item',text:formData.msg})
+                )
+            );
+        });
+        //switch chat
+        socket.on('switch_chat',function(){
 
         });
+
 
     
        
@@ -204,7 +208,7 @@ function getCookie(cname) {
 
 
 
-  <script  src='../index.js'></script>
+
   </body>
   
 </html>
