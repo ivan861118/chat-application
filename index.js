@@ -2,8 +2,11 @@ var express = require('express');
 var app=express();
 var server = require('http').Server(app);
 const io = require('socket.io')(server);
+// const records = require('./records.js'); // 新增這行
 
 
+var target = 'user1';
+var user = '';
 let onlineCount = 0;
 var users = [
     {
@@ -18,8 +21,59 @@ var users = [
         id:3,
         name:'user3',
     },
+    {
+        id:4,
+        name:'user4',
+    },
 
+    {
+        id:5,
+        name:'user5',
+    },
 ]
+
+var history=[
+    {
+        id:12,
+        msg:[]
+    },
+    {
+        id:13,
+        msg:[]
+    },
+    {
+        id:14,
+        msg:[]
+    },
+    {
+        id:15,
+        msg:[]
+    },
+    {
+        id:23,
+        msg:[]
+    },
+    {
+        id:24,
+        msg:[]
+    },
+    {
+        id:25,
+        msg:[]
+    },
+    {
+        id:34,
+        msg:[]
+    },
+    {
+        id:35,
+        msg:[]
+    },
+    {
+        id:45,
+        msg:[]
+    }
+];
 // //view engine
 // app.set('view engine','ejs');
 // app.set('views', path.join(__dirname, 'views'));
@@ -27,20 +81,32 @@ var users = [
 
 
 
+// app.use('/',express.static('views'));
+app.use('/login',express.static('views'));
 
-app.use('/assets',express.static('assets'));
+
 
 
 app.get('/', function(req, res){
-  res.sendFile(__dirname+'/views/index.html');
-
+  res.sendFile(__dirname+'/views/login.html');
 
 });
+
+app.get('/login', function(req, res){
+    res.sendFile(__dirname+'/views/index.html');
+  
+  });
+
+
+app.post('/login',function(req,res){
+    
+    res.redirect('/login');
+});
+  
 
 
 
 io.on('connection', function(socket){
-    console.log('a user connected');
 
 
     //有連線發生時增加人數
@@ -48,17 +114,35 @@ io.on('connection', function(socket){
     // 發送人數給網頁
     io.emit("online", onlineCount);
 
+    // socket.on('login',function(){
+    //     res.redirect('/index.html');
+   
+    // });
+
     socket.on('disconnect', function(){
-      console.log('user disconnected');
       onlineCount = (onlineCount < 0) ? 0 : onlineCount-=1;
       io.emit("online", onlineCount);
     });
 
     socket.on('send', function(formData){
-
-        // console.log('message: ' + formData.msg);
+        
+        history.push(formData);
         io.emit('send', formData);
       });
+
+    // socket.on('switch_chat',function(target_name){
+    //     target=target_name;//紀錄現在聊天對象
+    //     // var hist = xxxxx;
+        
+
+
+        
+
+
+    //     io.emit('switch_chat',hist);
+    // });
+
+      
     
   }); 
 
