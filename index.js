@@ -4,9 +4,9 @@ var server = require('http').Server(app);
 const io = require('socket.io')(server);
 // const records = require('./records.js'); // 新增這行
 
+const USER_NUM=5;
+const HIST_NUM=USER_NUM*(USER_NUM-1)/2;
 
-var target = 'user1';
-var user = '';
 let onlineCount = 0;
 var users = [
     {
@@ -34,45 +34,46 @@ var users = [
 
 var history=[
     {
-        id:12,
+        id:'12',
         msg:[]
     },
     {
-        id:13,
+        id:'13',
         msg:[]
     },
     {
-        id:14,
+        id:'14',
         msg:[]
     },
     {
-        id:15,
+        id:'15',
         msg:[]
     },
     {
-        id:23,
+        id:'23',
         msg:[]
     },
     {
-        id:24,
+        id:'24',
         msg:[]
     },
     {
-        id:25,
+        id:'25',
         msg:[]
     },
     {
-        id:34,
+        id:'34',
         msg:[]
     },
     {
-        id:35,
+        id:'35',
         msg:[]
     },
     {
-        id:45,
+        id:'45',
         msg:[]
     }
+   
 ];
 // //view engine
 // app.set('view engine','ejs');
@@ -111,98 +112,56 @@ io.on('connection', function(socket){
 
     //有連線發生時增加人數
     onlineCount++;
+    
     // 發送人數給網頁
     io.emit("online", onlineCount);
 
-    // socket.on('login',function(){
-    //     res.redirect('/index.html');
+    socket.on('login',function(name){
+       console.log('login');
+       console.log(name);
+
+    });
+
    
-    // });
 
     socket.on('disconnect', function(){
       onlineCount = (onlineCount < 0) ? 0 : onlineCount-=1;
       io.emit("online", onlineCount);
     });
 
-    socket.on('send', function(formData){
-        
-        history.push(formData);
-        io.emit('send', formData);
+    socket.on('send', function(chat_index,formData){
+        console.log("index in send func:"+chat_index);
+        history[chat_index].msg.push(formData);
+        socket.emit('send', formData);
+
       });
-
-    // socket.on('switch_chat',function(target_name){
-    //     target=target_name;//紀錄現在聊天對象
-    //     // var hist = xxxxx;
+//new add
+    socket.on('switch_chat',function(me,them){
+        var chat_index=findChatIndex(me,them);
+        console.log("chat_index:"+chat_index);
+        console.log("me:"+me+"them:"+them);
         
 
 
-        
-
-
-    //     io.emit('switch_chat',hist);
-    // });
+        socket.emit('switch_chat',chat_index,history[chat_index]);
+    });
 
       
     
   }); 
 
-//   ///cookies for log in
-//   function setCookie(cname, cvalue, exdays) {
-//     var d = new Date();
-//     d.setTime(d.getTime() + (exdays*24*60*60*1000));
-//     var expires = "expires="+ d.toUTCString();
-//     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-// }
-
-// function getCookie(cname) {
-//     var name = cname + "=";
-//     var decodedCookie = decodeURIComponent(document.cookie);
-//     var ca = decodedCookie.split(';');
-//     for(var i = 0; i <ca.length; i++) {
-//         var c = ca[i];
-//         while (c.charAt(0) == ' ') {
-//             c = c.substring(1);
-//         }
-//         if (c.indexOf(name) == 0) {
-//             return c.substring(name.length, c.length);
-//         }
-//     }
-//     return "";
-// }
-
-// function checkCookie() {
-//     var user = getCookie("username");
-//     if (user != "") {
-//         alert("Welcome again " + user);
-//     } else {
-//         user = prompt("Please enter your name:", "");
-//         if (user != "" && user != null) {
-//             setCookie("username", user, 365);
-//         }
-//     }
-// }
-
-// // 修改 connection 事件
-// io.on('connection', (socket) => {
-//     // 有連線發生時增加人數
-//     onlineCount++;
-//     // 發送人數給網頁
-//     io.emit("online", onlineCount);
+function findChatIndex(me,them){
+    for(let i=0;i<HIST_NUM;i++){
+        var my_id=me.slice(-1);//get '1' in user1 
+        var their_id=them.slice(-1);
+        var hist_id=history[i].id;
+        if(my_id+their_id==hist_id||their_id+my_id==hist_id){
+        return i;
+        }
+    }
  
-//     socket.on("greet", () => {
-//         socket.emit("greet", onlineCount);
-//     });
- 
-//     socket.on('disconnect', () => {
-//         // 有人離線了，扣人
-//         onlineCount = (onlineCount < 0) ? 0 : onlineCount-=1;
-//         io.emit("online", onlineCount);
-//     });
+}
 
-//     socket.on("send", (msg) => {
-//         console.log(msg)
-//     });
-// });
 
 server.listen(3000, function(){
   console.log('listening on *:3000');

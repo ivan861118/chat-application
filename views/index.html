@@ -94,17 +94,19 @@ html, body
   </div>
 
   <script>
-        
+        var chat_index =0; 
         var user_list=document.getElementsByClassName('user');
         
         //active class + handle conversation shown on window
         for(let i=0;i<user_list.length;i++){
             user_list[i].addEventListener('click',function(){
-                const target_name=$(this).text();
+                const them=$(this).text();
+                const me=$('#name').val();
                 $('#user-list li').removeClass('active');    
                 $(this).addClass("active");
-                // socket.emit('switch_chat',target_name);
-                $('#current-chat').text("目前對話者:"+target_name);
+
+                socket.emit('switch_chat',me,them);//new add
+                $('#current-chat').text("目前對話者:"+them);
                 
             
             });
@@ -123,7 +125,7 @@ html, body
                 msg: $('#msg').val()
             };
             
-          socket.emit('send',formData);
+          socket.emit('send',chat_index,formData);
           setCookie("name", $('#name').val());
           $('#msg').val('');
 
@@ -144,7 +146,19 @@ html, body
             );
         });
         //switch chat
-        socket.on('switch_chat',function(){
+        socket.on('switch_chat',function(index,hist){
+            chat_index = index;
+            console.log(chat_index);
+            var msg_list='';
+
+            if(hist.msg.length!=0){
+            msg_list=hist.msg.map(x=>
+            $('<li>',{class:'list-group-item',text:x.msg})
+            );}
+            $('#chat-window').empty();
+            $('#chat-window').append(
+                $('<div>').append(msg_list)
+            );
 
         });
 

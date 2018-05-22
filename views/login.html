@@ -2,10 +2,14 @@
 <html> 
     <head>
         <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>  
+        <script src="/socket.io/socket.io.js"></script>
         <title>Login:</title>
     </head>
 
     <body>
+    <script>
+            var socket = io();
+    </script>
         <h1>Login</h1>
         <form action='/login' method='post'> 
             Name : 
@@ -26,8 +30,8 @@
     <script>
        $("form").submit(function(req,res){
 
-
-           console.log('login');
+           socket.emit('login',$('#name').val());
+           
            window.location.href='/login';
         setCookie("name", $('#name').val()); 
 
