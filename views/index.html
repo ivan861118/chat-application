@@ -1,7 +1,7 @@
   <!doctype html>
 <html>
   <head>
-    <title>User Name:</title>
+    <title id='title'>User Name:</title>
     <!-- <link rel="stylesheet" href="style.css" type="text/css"> -->
 
     <meta charset="UTF-8">
@@ -67,7 +67,7 @@ html, body
                 </div>
                 <hr>
 
-                <div  style='height:350px' class="content container">
+                <div  style='height:450px' class="content container">
                     
                     <ul id='chat-window'>
                         
@@ -94,14 +94,17 @@ html, body
   </div>
 
   <script>
+        var them = 0;
+        var me = 0;
         var chat_index =0; 
         var user_list=document.getElementsByClassName('user');
+        $('#title').text(name);
         
         //active class + handle conversation shown on window
         for(let i=0;i<user_list.length;i++){
             user_list[i].addEventListener('click',function(){
-                const them=$(this).text();
-                const me=$('#name').val();
+                them=$(this).text();
+                me=$('#name').val();
                 $('#user-list li').removeClass('active');    
                 $(this).addClass("active");
 
@@ -125,7 +128,7 @@ html, body
                 msg: $('#msg').val()
             };
             
-          socket.emit('send',chat_index,formData);
+          socket.emit('send',chat_index,formData,me,them);
           setCookie("name", $('#name').val());
           $('#msg').val('');
 
@@ -138,27 +141,38 @@ html, body
               $('#online').text(amount);
           });
         //send message
-        socket.on('send',function(formData){
+        socket.on('send',function(formData,sender,receiver){
+            if(me==sender||me==receiver)
             $('#chat-window').append(
                 $('<div>').append(
-                $('<li>',{class:'list-group-item',text:formData.msg})
+                // if(flag==1){
+                // $('<li>',{class:'list-group-item bg-primary',text:formData.msg});
+                // }else{$('<li>',{class:'list-group-item ',text:formData.msg});}
+                (me==sender?
+                $('<li>',{class:'list-group-item bg-primary text-white text-right',text:formData.msg}):
+                $('<li>',{class:'list-group-item ',text:formData.msg})
+                )
+                
                 )
             );
         });
         //switch chat
         socket.on('switch_chat',function(index,hist){
             chat_index = index;
-            console.log(chat_index);
+            // console.log(chat_index);
             var msg_list='';
 
             if(hist.msg.length!=0){
             msg_list=hist.msg.map(x=>
+            (x.name==me?
+            $('<li>',{class:'list-group-item bg-primary text-white text-right',text:x.msg}):
             $('<li>',{class:'list-group-item',text:x.msg})
-            );}
+            ));
+            }//if
+
             $('#chat-window').empty();
-            $('#chat-window').append(
-                $('<div>').append(msg_list)
-            );
+            ////change
+            $('#chat-window').append(msg_list);
 
         });
 
