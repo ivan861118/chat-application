@@ -10,24 +10,24 @@ const HIST_NUM=USER_NUM*(USER_NUM-1)/2;
 let onlineCount = 0;
 var users = [
     {
-        id:1,
+        id:'',
         name:'user1',
     },
     {
-        id:2,
+        id:'',
         name:'user2',
     },
     {
-        id:3,
+        id:'',
         name:'user3',
     },
     {
-        id:4,
+        id:'',
         name:'user4',
     },
 
     {
-        id:5,
+        id:'',
         name:'user5',
     },
 ]
@@ -109,7 +109,7 @@ app.post('/login',function(req,res){
 
 io.on('connection', function(socket){
 
-
+    
     //有連線發生時增加人數
     onlineCount++;
     
@@ -118,7 +118,14 @@ io.on('connection', function(socket){
 
     socket.on('login',function(name){
        console.log('login');
-       console.log(name);
+       console.log(socket.id);
+       for(let i=0;i<USER_NUM;i++){
+           if(users[i].name==name){
+            users[i].id=socket.id;
+            console.log('success');
+        }
+       }
+   
 
     });
 
@@ -129,21 +136,31 @@ io.on('connection', function(socket){
       io.emit("online", onlineCount);
     });
 
-    socket.on('send', function(chat_index,formData){
-        console.log("index in send func:"+chat_index);
+    socket.on('send', function(chat_index,formData,me,them){
+
         history[chat_index].msg.push(formData);
-        socket.emit('send', formData);
+        
+        // var them=users.filter(x=>x.name==them);
+        // console.log(them);
+        
+        // socket.emit('send', formData,1);//1:me
+        // socket.broadcast.emit('send',formData,0,them);//them
+        io.emit('send',formData,me,them)
+       
 
       });
 //new add
     socket.on('switch_chat',function(me,them){
         var chat_index=findChatIndex(me,them);
-        console.log("chat_index:"+chat_index);
+        // console.log("chat_index:"+chat_index);
         console.log("me:"+me+"them:"+them);
         
 
 
         socket.emit('switch_chat',chat_index,history[chat_index]);
+        
+        
+        
     });
 
       
